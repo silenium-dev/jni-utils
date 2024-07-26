@@ -44,6 +44,10 @@ kotlin {
     jvmToolchain(8)
 }
 
+java {
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
