@@ -19,6 +19,8 @@ data class Platform(val os: OS, val arch: Arch, val extension: String? = null) :
 
     @Transient
     val full = "$os-$arch${extension ?: ""}"
+    @Transient
+    val osArch = "$os-$arch"
 
     @Transient
     val capitalized = full

@@ -11,6 +11,7 @@ class PlatformTest : StringSpec({
         val platform = Platform(Platform.OS.LINUX, Platform.Arch.X86, ".so")
         platform.extension shouldBe ".so"
         platform.full shouldBe "linux-x86.so"
+        platform.osArch shouldBe "linux-x86"
     }
 
     "capitalization is correct" {
