@@ -1,0 +1,41 @@
+[versions]
+kotlin = "2.0.0"
+
+slf4j = "2.0.13"
+logback = "1.5.6"
+
+kotest = "5.9.1"
+mockk = "1.13.11"
+
+commons-lang3 = "3.15.0"
+jetbrains-annotations = "24.1.0"
+
+[libraries]
+commons-lang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commons-lang3" }
+jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrains-annotations" }
+
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+
+kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
+kotest-property = { group = "io.kotest", name = "kotest-property", version.ref = "kotest" }
+kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+kotest-assertions-json = { group = "io.kotest", name = "kotest-assertions-json", version.ref = "kotest" }
+
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
+[bundles]
+logging = [
+    "slf4j-api",
+    "logback-classic",
+]
+
+kotest = [
+    "kotest-runner-junit5",
+    "kotest-property",
+    "kotest-assertions-core",
+    "kotest-assertions-json",
+]
