@@ -14,10 +14,11 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.bundles.logging)
+    implementation(libs.slf4j.api)
     implementation(libs.commons.lang3)
     implementation(libs.jetbrains.annotations)
 
+    testImplementation(libs.logback.classic)
     testImplementation(libs.bundles.kotest)
     testImplementation(libs.mockk)
 }

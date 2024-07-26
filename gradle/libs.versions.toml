@@ -28,11 +28,6 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [bundles]
-logging = [
-    "slf4j-api",
-    "logback-classic",
-]
-
 kotest = [
     "kotest-runner-junit5",
     "kotest-property",
