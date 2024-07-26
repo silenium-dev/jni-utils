@@ -53,6 +53,7 @@ jobs:
           retention-days: 5
   dependency-submission:
     runs-on: ubuntu-latest
+    if: "github.event_name != 'release'"
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v4
