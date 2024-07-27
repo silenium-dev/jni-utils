@@ -5,12 +5,6 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 
 data class Platform(val os: OS, val arch: Arch, val extension: String? = null) : Serializable {
-    constructor(platformString: String, extension: String? = null) : this(
-        OS.values().first { it.name.equals(platformString.split("-").first(), ignoreCase = true) },
-        Arch.values().first { it.name.equals(platformString.split("-").getOrNull(1), ignoreCase = true) },
-        extension,
-    )
-
     enum class OS {
         WINDOWS, LINUX, DARWIN;
 
@@ -41,6 +35,13 @@ data class Platform(val os: OS, val arch: Arch, val extension: String? = null) :
 
     private fun writeObject(out: ObjectOutputStream) {
         out.defaultWriteObject()
+    }
+
+    companion object {
+        operator fun invoke(platformString: String, extension: String? = null) = NativePlatform(
+            platformString.split("-")[0],
+            platformString.split("-")[1],
+        ).platform(extension)
     }
 }
 
