@@ -7,7 +7,7 @@ import java.io.Serializable
 data class Platform(val os: OS, val arch: Arch, val extension: String? = null) : Serializable {
     constructor(platformString: String, extension: String? = null) : this(
         OS.values().first { it.name.equals(platformString.split("-").first(), ignoreCase = true) },
-        Arch.values().first { it.name.equals(platformString.split("-").first(), ignoreCase = true) },
+        Arch.values().first { it.name.equals(platformString.split("-").getOrNull(1), ignoreCase = true) },
         extension,
     )
 
