@@ -5,6 +5,12 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 
 data class Platform(val os: OS, val arch: Arch, val extension: String? = null) : Serializable {
+    constructor(platformString: String, extension: String? = null) : this(
+        OS.values().first { it.name.equals(platformString.split("-").first(), ignoreCase = true) },
+        Arch.values().first { it.name.equals(platformString.split("-").first(), ignoreCase = true) },
+        extension,
+    )
+
     enum class OS {
         WINDOWS, LINUX, DARWIN;
 
@@ -19,6 +25,7 @@ data class Platform(val os: OS, val arch: Arch, val extension: String? = null) :
 
     @Transient
     val full = "$os-$arch${extension ?: ""}"
+
     @Transient
     val osArch = "$os-$arch"
 
