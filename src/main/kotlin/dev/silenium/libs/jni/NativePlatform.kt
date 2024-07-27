@@ -12,7 +12,7 @@ data class Platform(val os: OS, val arch: Arch, val extension: String? = null) :
     }
 
     enum class Arch {
-        X86, X86_64, ARM, ARM64;
+        X86, X86_64, ARM, ARM64, PPC64LE;
 
         override fun toString() = name.lowercase()
     }
@@ -67,6 +67,7 @@ class NativePlatform(osString: String, archString: String) : INativePlatform {
         isX86() -> Platform.Arch.X86
         isArm64() -> Platform.Arch.ARM64
         isArm() -> Platform.Arch.ARM
+        isPPC64LE() -> Platform.Arch.PPC64LE
 
         else -> throw UnsupportedOperationException("Unsupported architecture: $archString")
     }
@@ -91,6 +92,9 @@ class NativePlatform(osString: String, archString: String) : INativePlatform {
     private fun isX8664(): Boolean = ArchUtils.getProcessor(archString)?.let {
         it.isX86 && it.is64Bit
     } == true
+
+    private fun isPPC64LE(): Boolean = ArchUtils.getProcessor(archString)
+        ?.let { it.isPPC && it.is64Bit } == true || archString.contains("ppc64le")
 
     companion object : INativePlatform by NativePlatform(System.getProperty("os.name"), System.getProperty("os.arch"))
 }
