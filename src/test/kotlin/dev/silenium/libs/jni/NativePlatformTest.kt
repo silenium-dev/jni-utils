@@ -18,8 +18,8 @@ class NativePlatformTest : StringSpec({
     val parameters = Platform.OS.entries.flatMap { os ->
         Platform.Arch.entries.map { arch ->
             (0 until 10).map {
-                val randomPrefix = ('a'..'z').filter { it !in setOf('w', 'm', 'x') }.shuffled().take(5).joinToString("")
-                val randomSuffix = ('a'..'z').filter { it !in setOf('w', 'm', 'x') }.shuffled().take(5).joinToString("")
+                val randomPrefix = ('a'..'z').filter { it !in setOf('w', 'm', 'x', 'i') }.shuffled().take(5).joinToString("")
+                val randomSuffix = ('a'..'z').filter { it !in setOf('w', 'm', 'x', 'i') }.shuffled().take(5).joinToString("")
                 "$randomPrefix$os$randomSuffix" to "$arch"
             }.let {
                 Parameter(Platform(os, arch), it.toSet())
