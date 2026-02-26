@@ -17,19 +17,19 @@ data class Platform(val os: OS, val arch: Arch, val extension: String? = null) :
         override fun toString() = name.lowercase()
     }
 
-    @Transient
-    val full = "$os-$arch${extension ?: ""}"
+    val full
+        get() = "$osArch${extension ?: ""}"
 
-    @Transient
-    val osArch = "$os-$arch"
+    val osArch
+        get() = "$os-$arch"
 
-    @Transient
-    val capitalized = full
-        .split("-")
-        .joinToString("") {
-            it.replaceFirstChar(Char::uppercaseChar)
-                .replace(Regex("[^a-zA-Z0-9_]+"), "_")
-        }
+    val capitalized
+        get() = full
+            .split("-")
+            .joinToString("") {
+                it.replaceFirstChar(Char::uppercaseChar)
+                    .replace(Regex("[^a-zA-Z0-9_]+"), "_")
+            }
 
     override fun toString() = full
 
