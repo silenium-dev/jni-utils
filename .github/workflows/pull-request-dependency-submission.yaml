@@ -1,4 +1,4 @@
-name: Download and submit dependency graph
+name: "PR / Download and submit dependency graph"
 
 on:
   workflow_run:
