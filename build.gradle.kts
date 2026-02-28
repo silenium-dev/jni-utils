@@ -29,20 +29,20 @@ tasks.test {
 
 tasks.compileKotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_1_8
-        languageVersion = KotlinVersion.KOTLIN_1_7
+        jvmTarget = JvmTarget.JVM_11
+        languageVersion = KotlinVersion.KOTLIN_2_1
     }
 }
 
 tasks.compileTestKotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_1_8
+        jvmTarget = JvmTarget.JVM_11
         languageVersion = KotlinVersion.DEFAULT
     }
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(11)
 }
 
 java {
