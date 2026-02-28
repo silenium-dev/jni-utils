@@ -57,13 +57,15 @@ publishing {
     }
 
     repositories {
-        maven(System.getenv("REPOSILITE_URL") ?: "https://reposilite.silenium.dev/snapshots") {
-            name = "reposilite"
-            credentials {
-                username = System.getenv("REPOSILITE_USERNAME") ?: project.findProperty("reposiliteUser") as String?
-                        ?: ""
-                password = System.getenv("REPOSILITE_PASSWORD") ?: project.findProperty("reposilitePassword") as String?
-                        ?: ""
+        if (System.getenv().containsKey("MAVEN_REPO_URL")) {
+            maven(System.getenv("MAVEN_REPO_URL")) {
+                name = "reposilite"
+                credentials {
+                    username = System.getenv("MAVEN_REPO_USERNAME")
+                        ?: project.findProperty("reposiliteUser") as String?
+                    password = System.getenv("MAVEN_REPO_PASSWORD")
+                        ?: project.findProperty("reposilitePassword") as String?
+                }
             }
         }
     }

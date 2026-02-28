@@ -1,6 +1,6 @@
 # jni-utils
 
-A Kotlin library for platform specific loading of jni bindings.
+A Kotlin library for platform-specific loading of jni bindings.
 
 ## Usage
 
@@ -8,12 +8,12 @@ You can add the dependency to your project as follows:
 
 ```kotlin
 repositories {
-    maven("https://reposilite.silenium.dev/releases") {
+    maven("https://repoflow.silenium.dev/api/maven/public/maven-releases") {
         name = "silenium-releases"
     }
 }
 dependencies {
-    implementation("dev.silenium.libs.jni:jni-utils:0.1.0")
+    implementation("dev.silenium.libs.jni:jni-utils:0.2.0")
 }
 ```
 
