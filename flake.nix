@@ -3,17 +3,38 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem
-      (system:
+  outputs = { flake-parts, nixpkgs, ... } @ inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+    imports = [ ];
+    flake = {
+      lib =
         let
-          pkgs = nixpkgs.legacyPackages.${system};
-          baseEnvs = {
-            crossBuildDeps = pkgBase: with pkgBase; if pkgBase.stdenv.hostPlatform.system != "x86_64-windows" then [
-              # Libraries
+          pkgs = nixpkgs.legacyPackages."x86_64-linux";
+        in
+        rec {
+          osOf = targetSystem: builtins.elemAt (pkgs.lib.strings.split "-" targetSystem) 2;
+          archOf = targetSystem: builtins.elemAt (pkgs.lib.strings.split "-" targetSystem) 0;
+          linuxFfmpegArchOf = targetSystem:
+            let
+              arch = builtins.elemAt (pkgs.lib.strings.split "-" targetSystem) 0;
+            in
+            if arch == "x86_64" then "64"
+            else if arch == "aarch64" then "arm64"
+            else throw "Unsupported architecture ${arch}";
+
+          targetPkgs = target:
+            if target == "x86_64-linux" then pkgs
+            else if target == "aarch64-linux" then pkgs.pkgsCross.aarch64-multiplatform
+            else if target == "x86_64-windows" then pkgs.pkgsCross.mingwW64
+            else throw "Unsupported target ${target}";
+          targetBuildDeps = target:
+            let
+              pkgs = targetPkgs target;
+            in
+            if target == "x86_64-windows" then [ ]
+            else with pkgs; [
               libGL
               mesa-gl-headers
               libdrm
@@ -24,94 +45,108 @@
               libva
               systemdLibs
               hwdata
-            ] else [ ];
-            crossBuildTools = pkgBase: with pkgBase; [
-              gcc
-              binutils
-              pkg-config
             ];
-            nativeBuildTools = with pkgs; [
-              # Java Development
-              jdk21
-              gradle_9
+          nativeBuildDeps = target:
+            let
+              crossPkgs = targetPkgs target;
+            in
+            [
+              # C/C++ Toolchain
+              crossPkgs.gcc
+              crossPkgs.binutils
+              crossPkgs.pkg-config
 
-              # C/C++ Build Toolchain
-              cmake
-              ninja
-              meson
+              # Java Development
+              pkgs.jdk21
+              pkgs.gradle_9
+
+              # C/C++ Build Tools
+              pkgs.cmake
+              pkgs.ninja
+              pkgs.meson
 
               # Additional utilities
-              git
-              python3
-              perl
+              pkgs.git
+              pkgs.python3
+              pkgs.perl
+              pkgs.gnused
             ];
-          };
-        in
-        {
-          lib = rec {
-            inherit system;
-            inherit (baseEnvs) crossBuildDeps crossBuildTools nativeBuildTools;
 
-            targetCrossPkgs = pkgs: target:
-              if target == "aarch64-linux" then pkgs.pkgsCross.aarch64-multiplatform
-              else if target == "x86_64-linux" then pkgs
-              else if target == "x86_64-windows" then pkgs.pkgsCross.mingwW64
-              else throw "Invalid target ${target}";
+          buildJNILib =
+            { name
+            , sources ? targetSystem: [ ]
+            , targetSystems ? [
+                "x86_64-linux"
+                "aarch64-linux"
+                "x86_64-windows"
+              ]
+            , mesonTarget
+            , libName
+            , libDir ? null
+            , preConfigurePhase ? sys: ""
+            , postConfigurePhase ? sys: ""
+            , postUnpackPhase ? sys: ":"
+            , unpack ? sys: null
+            , patch ? sys: null
+            , preUnpackPhase ? sys: ":"
+            , additionalNativeInputs ? [ ]
+            , additionalInputs ? [ ]
+            }:
+            let
+              forAllSystems = f: builtins.listToAttrs (map
+                (targetSystem: {
+                  name = "${name}-${targetSystem}";
+                  value = f targetSystem;
+                })
+                targetSystems);
+              fullLibFile = targetSystem: name:
+                if targetSystem == "x86_64-windows" then "lib${name}.dll"
+                else "lib${name}.so";
+            in
+            forAllSystems (targetSystem: pkgs.stdenv.mkDerivation rec {
+              pname = name + "-${targetSystem}";
+              version = "0.1.0";
+              srcs = sources targetSystem;
 
-            baseSetup = { pkgs, target ? system, extraNativeBuildInputs ? [ ], extraBuildInputs ? [ ] }:
-              let
-                crossPkgs = (targetCrossPkgs pkgs target);
-              in
-              {
-                strictDeps = true;
-                nativeBuildInputs = baseEnvs.nativeBuildTools
-                  ++ (baseEnvs.crossBuildTools crossPkgs)
-                  ++ extraNativeBuildInputs;
-                buildInputs = (baseEnvs.crossBuildDeps crossPkgs) ++ extraBuildInputs;
+              postUnpack = postUnpackPhase targetSystem;
+              unpackPhase = unpack targetSystem;
+              preUnpack = preUnpackPhase targetSystem;
 
-                JAVA_HOME = "${pkgs.jdk21}";
-                CMAKE_GENERATOR = "Ninja";
-              };
+              patchPhase = patch targetSystem;
 
-            mkDevShell = { pkgs, target ? system, extraNativeBuildInputs ? [ ], extraBuildInputs ? [ ] }:
-              pkgs.mkShell
-                ({
-                  shellHook = ''
-                    echo "Development environment loaded"
-                    echo "Java version: $(java -version 2>&1 | head -n 1)"
-                    echo "Gradle version: $(gradle --version | grep Gradle)"
-                    echo "CMake version: $(cmake --version | head -n 1)"
-                    echo "GCC version: $(gcc --version | head -n 1)"
-                    echo "Ninja version: $(ninja --version)"
-                  '';
-                } // baseSetup { inherit pkgs target extraNativeBuildInputs extraBuildInputs; });
+              buildInputs = (targetBuildDeps targetSystem) ++ additionalInputs;
+              nativeBuildInputs = (nativeBuildDeps targetSystem) ++ additionalNativeInputs;
+              sourceRoot = ".";
 
-            buildJNILib = { name, version, source, pkgs, target ? system, extraNativeBuildInputs ? [ ], extraBuildInputs ? [ ] }:
-              pkgs.stdenv.mkDerivation
-                ({
-                  inherit name version source;
+              mesonFlags = [
+                "--cross-file=${./cross/${targetSystem}.ini}"
+              ];
+              buildDir = "build-${targetSystem}";
 
-                  buildPhase = ''
-                    echo "Building..."
-                  '';
-                } // baseSetup { inherit pkgs target extraNativeBuildInputs extraBuildInputs; });
-          };
-          devShells = {
-            default = self.lib.${system}.mkDevShell { inherit pkgs; };
-            linux-arm64 = self.lib.${system}.mkDevShell {
-              inherit pkgs;
-              target = "aarch64-linux";
-              extraNativeBuildInputs = with pkgs; [ qemu-user ];
-            };
-            linux-x86_64 = self.lib.${system}.mkDevShell {
-              inherit pkgs;
-            };
-            windows-x86_64 = self.lib.${system}.mkDevShell {
-              inherit pkgs;
-              target = "x86_64-windows";
-              extraNativeBuildInputs = with pkgs; [ wineWow64Packages.staging ];
-            };
-          };
-        }
-      );
+              configurePhase = (pkgs.lib.strings.join "\n" [
+                (preConfigurePhase targetSystem)
+                "meson setup ${pkgs.lib.strings.join " " mesonFlags} ${buildDir}"
+                (postConfigurePhase targetSystem)
+              ]);
+
+              buildPhase = ''
+                meson compile -C ${buildDir} ${mesonTarget}
+              '';
+
+              fullLibPath = pkgs.lib.strings.join "/" (
+                [ buildDir ]
+                ++ pkgs.lib.optional (libDir != null && libDir != "") libDir
+                ++ [ (fullLibFile targetSystem libName) ]
+              );
+
+              installPhase = ''
+                mkdir -p $out/lib
+                mv ${fullLibPath} $out/lib
+              '';
+            });
+        };
+    };
+
+    systems = [ "x86_64-linux" ];
+  };
 }
