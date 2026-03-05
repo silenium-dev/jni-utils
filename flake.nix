@@ -70,6 +70,7 @@
               pkgs.python3
               pkgs.perl
               pkgs.gnused
+              pkgs.qemu-user
             ];
 
           buildJNILib =
@@ -120,6 +121,7 @@
 
               mesonFlags = [
                 "--cross-file=${./cross/${targetSystem}.ini}"
+                "--buildtype=${buildType}"
               ];
               buildDir = "build-${targetSystem}";
 
