@@ -75,6 +75,7 @@
 
           buildJNILib =
             { name
+            , version ? "0.1.0"
             , sources ? targetSystem: [ ]
             , targetSystems ? [
                 "x86_64-linux"
@@ -95,19 +96,25 @@
             , additionalInputs ? [ ]
             }:
             let
-              forAllSystems = f: builtins.listToAttrs (map
-                (targetSystem: {
-                  name = "${name}-${targetSystem}";
-                  value = f targetSystem;
-                })
-                targetSystems);
+              forAllSystems = f:
+                let
+                  archResults = (builtins.listToAttrs (map
+                    (targetSystem: {
+                      name = "${name}-${targetSystem}";
+                      value = f targetSystem;
+                    })
+                    targetSystems));
+                in
+                {
+                  default = pkgs.linkFarmFromDrvs "${name}" (builtins.attrValues archResults);
+                } // archResults;
               fullLibFile = targetSystem: name:
                 if targetSystem == "x86_64-windows" then "lib${name}.dll"
                 else "lib${name}.so";
             in
             forAllSystems (targetSystem: pkgs.stdenv.mkDerivation rec {
               pname = name + "-${targetSystem}";
-              version = "0.1.0";
+              inherit version;
               srcs = sources targetSystem;
 
               postUnpack = postUnpackPhase targetSystem;
