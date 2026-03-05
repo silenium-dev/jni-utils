@@ -82,6 +82,7 @@
                 "x86_64-windows"
               ]
             , mesonTarget
+            , buildType ? "debug"
             , libName
             , libDir ? null
             , preConfigurePhase ? sys: ""
