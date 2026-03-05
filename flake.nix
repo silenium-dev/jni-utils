@@ -86,12 +86,14 @@
             , buildType ? "debug"
             , libName
             , libDir ? null
-            , preConfigurePhase ? sys: ""
-            , postConfigurePhase ? sys: ""
+            , preUnpackPhase ? sys: ":"
             , postUnpackPhase ? sys: ":"
             , unpack ? sys: null
             , patch ? sys: null
-            , preUnpackPhase ? sys: ":"
+            , preConfigurePhase ? sys: ""
+            , postConfigurePhase ? sys: ""
+            , preInstallPhase ? sys: ":"
+            , postInstallPhase ? sys: ":"
             , additionalNativeInputs ? [ ]
             , additionalInputs ? [ ]
             }:
@@ -149,10 +151,11 @@
                 ++ [ (fullLibFile targetSystem libName) ]
               );
 
-              installPhase = ''
-                mkdir -p $out/lib
-                mv ${fullLibPath} $out/lib
-              '';
+              installPhase = (pkgs.lib.strings.join "\n" [
+                (preInstallPhase targetSystem)
+                "mkdir -p $out/lib && cp ${fullLibPath} $out/lib/"
+                (postInstallPhase targetSystem)
+              ]);
             });
         };
     };
