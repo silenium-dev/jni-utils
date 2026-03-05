@@ -108,7 +108,7 @@
                     targetSystems));
                 in
                 {
-                  default = pkgs.linkFarmFromDrvs "${name}" (builtins.attrValues archResults);
+                  "${name}" = pkgs.linkFarmFromDrvs "${name}" (builtins.attrValues archResults);
                 } // archResults;
               fullLibFile = targetSystem: name:
                 if targetSystem == "x86_64-windows" then "lib${name}.dll"
