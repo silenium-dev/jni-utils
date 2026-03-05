@@ -94,8 +94,8 @@
             , postConfigurePhase ? sys: ""
             , preInstallPhase ? sys: ":"
             , postInstallPhase ? sys: ":"
-            , additionalNativeInputs ? [ ]
-            , additionalInputs ? [ ]
+            , additionalNativeInputs ? targetSystem: pkgs: [ ]
+            , additionalInputs ? targetSystem: pkgs: [ ]
             }:
             let
               forAllSystems = f:
@@ -110,8 +110,11 @@
                 {
                   "${name}" = pkgs.linkFarmFromDrvs "${name}" (builtins.attrValues archResults);
                 } // archResults;
-              fullLibFile = targetSystem: name:
+              compiledLibName = targetSystem: name:
                 if targetSystem == "x86_64-windows" then "lib${name}.dll"
+                else "lib${name}.so";
+              outLibName = targetSystem: name:
+                if targetSystem == "x86_64-windows" then "${name}.dll"
                 else "lib${name}.so";
             in
             forAllSystems (targetSystem: pkgs.stdenv.mkDerivation rec {
@@ -125,13 +128,16 @@
 
               patchPhase = patch targetSystem;
 
-              buildInputs = (targetBuildDeps targetSystem) ++ additionalInputs;
-              nativeBuildInputs = (nativeBuildDeps targetSystem) ++ additionalNativeInputs;
+              buildInputs = (targetBuildDeps targetSystem) ++ (additionalInputs targetSystem (targetPkgs targetSystem));
+              nativeBuildInputs = (nativeBuildDeps targetSystem) ++ (additionalNativeInputs targetSystem pkgs);
               sourceRoot = ".";
 
               mesonFlags = [
                 "--cross-file=${./cross/${targetSystem}.ini}"
                 "--buildtype=${buildType}"
+                "-Dwrap_mode=forcefallback"
+                "-Ddefault_library=static"
+                "-Dprefer_static=true"
               ];
               buildDir = "build-${targetSystem}";
 
@@ -148,12 +154,15 @@
               fullLibPath = pkgs.lib.strings.join "/" (
                 [ buildDir ]
                 ++ pkgs.lib.optional (libDir != null && libDir != "") libDir
-                ++ [ (fullLibFile targetSystem libName) ]
+                ++ [ (compiledLibName targetSystem libName) ]
               );
 
               installPhase = (pkgs.lib.strings.join "\n" [
                 (preInstallPhase targetSystem)
-                "mkdir -p $out/lib && cp ${fullLibPath} $out/lib/"
+                ''
+                  mkdir -p $out/lib
+                  cp ${fullLibPath} $out/lib/${outLibName targetSystem libName}
+                ''
                 (postInstallPhase targetSystem)
               ]);
             });
