@@ -59,7 +59,7 @@ publishing {
     repositories {
         if (System.getenv().containsKey("MAVEN_REPO_URL")) {
             maven(System.getenv("MAVEN_REPO_URL")) {
-                name = "reposilite"
+                name = "nexus"
                 credentials {
                     username = System.getenv("MAVEN_REPO_USERNAME")
                         ?: project.findProperty("reposiliteUser") as String?
