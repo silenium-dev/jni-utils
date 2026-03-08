@@ -18,10 +18,10 @@ jobs:
       - uses: silenium-dev/actions/kotlin@main
         with:
           gradle-cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
-          snapshot-repo-url: "https://repoflow.silenium.dev/api/maven/public/maven-snapshots"
-          release-repo-url: "https://repoflow.silenium.dev/api/maven/public/maven-releases"
-          repo-username: ${{ secrets.REPOFLOW_USERNAME }}
-          repo-password: ${{ secrets.REPOFLOW_PASSWORD }}
+          snapshot-repo-url: "https://nexus.silenium.dev/repository/maven-snapshots"
+          release-repo-url: "https://nexus.silenium.dev/repository/maven-releases"
+          repo-username: ${{ secrets.NEXUS_USERNAME }}
+          repo-password: ${{ secrets.NEXUS_PASSWORD }}
           java-version: 8
   dependency-submission:
     runs-on: ubuntu-latest
