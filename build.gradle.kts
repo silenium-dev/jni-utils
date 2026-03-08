@@ -61,10 +61,8 @@ publishing {
             maven(System.getenv("MAVEN_REPO_URL")) {
                 name = "nexus"
                 credentials {
-                    username = System.getenv("MAVEN_REPO_USERNAME")
-                        ?: project.findProperty("reposiliteUser") as String?
-                    password = System.getenv("MAVEN_REPO_PASSWORD")
-                        ?: project.findProperty("reposilitePassword") as String?
+                    username = System.getenv("MAVEN_REPO_USERNAME") ?: ""
+                    password = System.getenv("MAVEN_REPO_PASSWORD") ?: ""
                 }
             }
         }
