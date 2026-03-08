@@ -1,8 +1,6 @@
 name: "Build, Test and Publish"
 on:
   push:
-    branches:
-      - '*'
     tags-ignore:
       - '*'
   workflow_dispatch:
@@ -22,7 +20,7 @@ jobs:
           release-repo-url: "https://nexus.silenium.dev/repository/maven-releases"
           repo-username: ${{ secrets.NEXUS_USERNAME }}
           repo-password: ${{ secrets.NEXUS_PASSWORD }}
-          java-version: 8
+          java-version: 21
   dependency-submission:
     runs-on: ubuntu-latest
     if: "github.event_name != 'release'"
