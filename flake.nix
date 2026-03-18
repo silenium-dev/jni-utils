@@ -164,7 +164,7 @@
               ]);
 
               buildPhase = ''
-                meson compile -C ${buildDir} ${mesonTarget}
+                meson compile -v -C ${buildDir} ${mesonTarget}
               '';
 
               fullLibPath = pkgs.lib.strings.join "/" (
