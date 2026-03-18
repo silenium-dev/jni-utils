@@ -1,5 +1,23 @@
 {
   "nodes": {
+    "clang-msvc-cross": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1773865160,
+        "narHash": "sha256-ABYOGrX+S+AbhEAlrzXVnulrxXVIAfNVlntNVJb6g5w=",
+        "ref": "refs/heads/main",
+        "rev": "abd1b46c648c3e04966fcc5f20cbc440853a5095",
+        "revCount": 4,
+        "type": "git",
+        "url": "https://codeberg.org/silenium-dev/clang-msvc-cross.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/silenium-dev/clang-msvc-cross.git"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -20,16 +38,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1771848320,
-        "narHash": "sha256-0MAd+0mun3K/Ns8JATeHT1sX28faLII5hVLq0L3BdZU=",
+        "lastModified": 1773282481,
+        "narHash": "sha256-b/GV2ysM8mKHhinse2wz+uP37epUrSE+sAKXy/xvBY4=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "2fc6539b481e1d2569f25f8799236694180c0993",
+        "rev": "fe416aaedd397cacb33a610b33d60ff2b431b127",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-unstable",
+        "ref": "fe416aaedd397cacb33a610b33d60ff2b431b127",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -49,10 +67,27 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1773282481,
+        "narHash": "sha256-b/GV2ysM8mKHhinse2wz+uP37epUrSE+sAKXy/xvBY4=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "fe416aaedd397cacb33a610b33d60ff2b431b127",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "fe416aaedd397cacb33a610b33d60ff2b431b127",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
+        "clang-msvc-cross": "clang-msvc-cross",
         "flake-parts": "flake-parts",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       }
     }
   },

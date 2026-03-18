@@ -2,18 +2,23 @@
   description = "jni build environment";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=fe416aaedd397cacb33a610b33d60ff2b431b127";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    clang-msvc-cross.url = "git+https://codeberg.org/silenium-dev/clang-msvc-cross.git";
   };
 
-  outputs = { flake-parts, nixpkgs, ... } @ inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = { flake-parts, nixpkgs, clang-msvc-cross, ... } @ inputs: flake-parts.lib.mkFlake { inherit inputs; } {
     imports = [ ];
     flake = {
       lib =
         let
-          pkgs = nixpkgs.legacyPackages."x86_64-linux";
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+          };
         in
         rec {
+          isWindows = targetSystem: (osOf targetSystem) == "windows";
+          isLinux = targetSystem: (osOf targetSystem) == "linux";
           osOf = targetSystem: builtins.elemAt (pkgs.lib.strings.split "-" targetSystem) 2;
           archOf = targetSystem: builtins.elemAt (pkgs.lib.strings.split "-" targetSystem) 0;
           linuxFfmpegArchOf = targetSystem:
@@ -24,38 +29,32 @@
             else if arch == "aarch64" then "arm64"
             else throw "Unsupported architecture ${arch}";
 
-          targetPkgs = target:
-            if target == "x86_64-linux" then pkgs
-            else if target == "aarch64-linux" then pkgs.pkgsCross.aarch64-multiplatform
-            else if target == "x86_64-windows" then pkgs.pkgsCross.mingwW64
-            else throw "Unsupported target ${target}";
+          targetPkgs = target: {
+            "x86_64-linux" = pkgs;
+            "aarch64-linux" = pkgs.pkgsCross.aarch64-multiplatform;
+            "x86_64-windows" = pkgs.pkgsCross.x86_64-windows;
+            "aarch64-windows" = pkgs.pkgsCross.aarch64-windows;
+          }."${target}";
           targetBuildDeps = target:
-            let
-              pkgs = targetPkgs target;
-            in
-            if target == "x86_64-windows" then [ ]
-            else with pkgs; [
-              libGL
-              mesa-gl-headers
-              libdrm
-              libx11
-              libva
-              libdovi
-              libdrm
-              libva
-              systemdLibs
-              hwdata
-            ];
+            if isLinux target then
+              let
+                pkgs = targetPkgs target;
+              in
+              with pkgs; [
+                libGL
+                mesa-gl-headers
+                libdrm
+                libx11
+                libva
+                libdovi
+                libdrm
+                libva
+                systemdLibs
+                hwdata
+              ]
+            else [ ];
           nativeBuildDeps = target:
-            let
-              crossPkgs = targetPkgs target;
-            in
             [
-              # C/C++ Toolchain
-              crossPkgs.gcc
-              crossPkgs.binutils
-              crossPkgs.pkg-config
-
               # Java Development
               pkgs.jdk21
               pkgs.gradle_9
@@ -71,7 +70,20 @@
               pkgs.perl
               pkgs.gnused
               pkgs.qemu-user
-            ];
+              pkgs.wineWow64Packages.stable
+            ] ++ (
+              if isLinux target then
+                let
+                  crossPkgs = targetPkgs target;
+                in
+                [
+                  # C/C++ Toolchain
+                  crossPkgs.gcc
+                  crossPkgs.binutils
+                  crossPkgs.pkg-config
+                ]
+              else [ ]
+            );
 
           buildJNILib =
             { name
@@ -111,13 +123,17 @@
                   "${name}" = pkgs.linkFarmFromDrvs "${name}" (builtins.attrValues archResults);
                 } // archResults;
               compiledLibName = targetSystem: name:
-                if targetSystem == "x86_64-windows" then "lib${name}.dll"
+                if isWindows targetSystem then "${name}.dll"
                 else "lib${name}.so";
               outLibName = targetSystem: name:
-                if targetSystem == "x86_64-windows" then "${name}.dll"
+                if isWindows targetSystem then "${name}.dll"
                 else "lib${name}.so";
+              mkDerivation = targetSystem:
+                if isWindows targetSystem
+                then clang-msvc-cross.lib.mkDerivation (archOf targetSystem)
+                else pkgs.stdenv.mkDerivation;
             in
-            forAllSystems (targetSystem: pkgs.stdenv.mkDerivation rec {
+            forAllSystems (targetSystem: (mkDerivation targetSystem) rec {
               pname = name + "-${targetSystem}";
               inherit version;
               srcs = sources targetSystem;
@@ -133,7 +149,7 @@
               sourceRoot = ".";
 
               mesonFlags = [
-                "--cross-file=${./cross/${targetSystem}.ini}"
+                "--cross-file=${if isWindows targetSystem then "$CROSS_FILE" else ./cross/${targetSystem}.ini}"
                 "--buildtype=${buildType}"
                 "-Dwrap_mode=forcefallback"
                 "-Ddefault_library=static"
