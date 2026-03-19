@@ -57,7 +57,6 @@ class NixNativesPlugin : Plugin<Project> {
             project.tasks.named<ProcessResources>("processResources") {
                 val out = nixBuild.flatMap { it.resultDir.asFile }
                 from(out)
-                into("natives")
                 dirPermissions {
                     it.unix("755")
                 }
