@@ -126,9 +126,9 @@
                     targetSystems));
                 in
                 {
-                  "${name}" = pkgs.linkFarm "natives/${name}" (pkgs.lib.concatMapAttrs
+                  "${name}" = pkgs.linkFarm name (pkgs.lib.concatMapAttrs
                     (k: v: {
-                      "${systemNativesMapping."${k}"}" = v;
+                      "natives/${systemNativesMapping."${k}"}" = v;
                     })
                     archResults);
                 } // (pkgs.lib.concatMapAttrs (k: v: { "${name}-${k}" = v; }) archResults);
