@@ -5,9 +5,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.work.DisableCachingByDefault
 
-// Never cache as read-only outputs break cache restore
-// Caching will instead happen on nix level
+@DisableCachingByDefault(because = "Nix build outputs are read-only, which breaks gradle caching")
 abstract class NixBuildTask : Exec() {
     @get:Input
     abstract val libName: Property<String>
