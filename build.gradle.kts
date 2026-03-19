@@ -6,13 +6,6 @@ plugins {
     `maven-publish`
 }
 
-group = "dev.silenium.libs.jni"
-version = findProperty("deploy.version") as String? ?: "0.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.commons.lang3)
@@ -55,14 +48,28 @@ publishing {
             from(components["java"])
         }
     }
+}
+
+allprojects {
+    apply<MavenPublishPlugin>()
+    apply<BasePlugin>()
+
+    group = "dev.silenium.libs.jni"
+    version = findProperty("deploy.version") as String? ?: "0.0.0-SNAPSHOT"
 
     repositories {
-        if (System.getenv().containsKey("MAVEN_REPO_URL")) {
-            maven(System.getenv("MAVEN_REPO_URL")) {
-                name = "nexus"
-                credentials {
-                    username = System.getenv("MAVEN_REPO_USERNAME") ?: ""
-                    password = System.getenv("MAVEN_REPO_PASSWORD") ?: ""
+        mavenCentral()
+    }
+
+    publishing {
+        repositories {
+            if (System.getenv().containsKey("MAVEN_REPO_URL")) {
+                maven(System.getenv("MAVEN_REPO_URL")) {
+                    name = "nexus"
+                    credentials {
+                        username = System.getenv("MAVEN_REPO_USERNAME") ?: ""
+                        password = System.getenv("MAVEN_REPO_PASSWORD") ?: ""
+                    }
                 }
             }
         }

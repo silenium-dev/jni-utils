@@ -28,6 +28,12 @@
             if arch == "x86_64" then "64"
             else if arch == "aarch64" then "arm64"
             else throw "Unsupported architecture ${arch}";
+          systemNativesMapping = {
+            "x86_64-linux" = "linux-x86_64";
+            "aarch64-linux" = "linux-arm64";
+            "x86_64-windows" = "windows-x86_64";
+            "aarch64-windows" = "windows-arm64";
+          };
 
           targetPkgs = target: {
             "x86_64-linux" = pkgs;
@@ -114,14 +120,18 @@
                 let
                   archResults = (builtins.listToAttrs (map
                     (targetSystem: {
-                      name = "${name}-${targetSystem}";
+                      name = targetSystem;
                       value = f targetSystem;
                     })
                     targetSystems));
                 in
                 {
-                  "${name}" = pkgs.linkFarmFromDrvs "${name}" (builtins.attrValues archResults);
-                } // archResults;
+                  "${name}" = pkgs.linkFarm "${name}" (pkgs.lib.concatMapAttrs
+                    (k: v: {
+                      "${systemNativesMapping."${k}"}" = v;
+                    })
+                    archResults);
+                } // (pkgs.lib.concatMapAttrs (k: v: { "${name}-${k}" = v; }) archResults);
               compiledLibName = targetSystem: name:
                 if isWindows targetSystem then "${name}.dll"
                 else "lib${name}.so";
@@ -176,8 +186,8 @@
               installPhase = (pkgs.lib.strings.join "\n" [
                 (preInstallPhase targetSystem)
                 ''
-                  mkdir -p $out/lib
-                  cp ${fullLibPath} $out/lib/${outLibName targetSystem libName}
+                  mkdir -p $out
+                  cp ${fullLibPath} $out/${outLibName targetSystem libName}
                 ''
                 (postInstallPhase targetSystem)
               ]);
