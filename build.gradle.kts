@@ -6,6 +6,48 @@ plugins {
     `maven-publish`
 }
 
+val deployEnabled = (findProperty("deploy.enabled") as String?)?.toBoolean() ?: false
+
+allprojects {
+    apply<MavenPublishPlugin>()
+    apply<BasePlugin>()
+
+    group = "dev.silenium.libs.jni"
+    val gitVersionProvider = providers.gradleProperty("ci").flatMap {
+        if (it.toBoolean()) {
+            providers.exec {
+                commandLine("git", "describe", "--tags")
+                workingDir = layout.projectDirectory.asFile
+            }.standardOutput.asText.map(String::trim)
+        } else null
+    }
+    version = providers
+        .gradleProperty("deploy.version")
+        .orElse(gitVersionProvider)
+        .orElse("0.0.0-SNAPSHOT")
+        .get()
+
+    repositories {
+        mavenCentral()
+    }
+
+    publishing {
+        repositories {
+            if (deployEnabled) {
+                val url = findProperty("deploy.repo-url") as? String ?: error("No deploy.repo-url specified")
+                maven(url) {
+                    name = "nexus"
+                    credentials {
+                        username = findProperty("deploy.username") as? String ?: ""
+                        password = findProperty("deploy.password") as? String ?: ""
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.commons.lang3)
@@ -44,34 +86,8 @@ java {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("main") {
             from(components["java"])
-        }
-    }
-}
-
-allprojects {
-    apply<MavenPublishPlugin>()
-    apply<BasePlugin>()
-
-    group = "dev.silenium.libs.jni"
-    version = findProperty("deploy.version") as String? ?: "0.0.0-SNAPSHOT"
-
-    repositories {
-        mavenCentral()
-    }
-
-    publishing {
-        repositories {
-            if (System.getenv().containsKey("MAVEN_REPO_URL")) {
-                maven(System.getenv("MAVEN_REPO_URL")) {
-                    name = "nexus"
-                    credentials {
-                        username = System.getenv("MAVEN_REPO_USERNAME") ?: ""
-                        password = System.getenv("MAVEN_REPO_PASSWORD") ?: ""
-                    }
-                }
-            }
         }
     }
 }

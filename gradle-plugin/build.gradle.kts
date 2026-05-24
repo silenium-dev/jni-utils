@@ -3,13 +3,6 @@ plugins {
     alias(libs.plugins.kotlin)
 }
 
-group = "dev.silenium.libs.jni"
-version = findProperty("deploy.version") as String? ?: "0.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":"))
     api(libs.kotlin.jvm.gradle.plugin)
