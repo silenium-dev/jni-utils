@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     `java-gradle-plugin`
     alias(libs.plugins.kotlin)
@@ -18,8 +20,19 @@ tasks.test {
     useJUnitPlatform()
 }
 
+kotlin {
+    jvmToolchain(11)
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+}
+
 java {
     withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    toolchain.languageVersion.set(JavaLanguageVersion.of(11))
 }
 
 gradlePlugin {
