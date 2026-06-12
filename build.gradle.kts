@@ -19,12 +19,11 @@ val signingEnabled = (findProperty("gpg.enabled") as String?)?.toBoolean() ?: fa
 val signingSecretKey = Base64.decode((findProperty("gpg.secret-key") as? String ?: "").trim()).decodeToString()
 val signingPublicKey = Base64.decode((findProperty("gpg.public-key") as? String ?: "").trim()).decodeToString()
 val signingPassphrase = (findProperty("gpg.passphrase") as? String ?: "").trim()
-val stagingRepo = layout.buildDirectory.dir("m2-staging")
+val stagingRepo = rootProject.layout.buildDirectory.dir("m2-staging")
 
 allprojects {
     apply<MavenPublishPlugin>()
     apply<BasePlugin>()
-    apply<JReleaserPlugin>()
 
     group = "dev.silenium.libs.jni"
     val gitVersionProvider = providers.gradleProperty("ci").flatMap {
@@ -86,36 +85,35 @@ allprojects {
             }
         }
     }
+}
 
-    jreleaser {
-        signing {
-            active = if (signingEnabled) Active.ALWAYS else Active.NEVER
-            pgp {
-                mode = Signing.Mode.MEMORY
-                passphrase = signingPassphrase
-                secretKey = signingSecretKey
-                publicKey = signingPublicKey
-            }
+jreleaser {
+    signing {
+        active = if (signingEnabled) Active.ALWAYS else Active.NEVER
+        pgp {
+            mode = Signing.Mode.MEMORY
+            passphrase = signingPassphrase
+            secretKey = signingSecretKey
+            publicKey = signingPublicKey
         }
-        deploy {
-            maven {
-                mavenCentral {
-                    register("sonatype") {
-                        active = if (mavenCentralEnabled) Active.ALWAYS else Active.NEVER
-                        url = "https://central.sonatype.com/api/v1/publisher"
-                        stagingRepository(stagingRepo.get())
-                        username = findProperty("maven-central.username") as? String ?: ""
-                        password = findProperty("maven-central.password") as? String ?: ""
-                    }
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                register("sonatype") {
+                    active = if (mavenCentralEnabled) Active.ALWAYS else Active.NEVER
+                    url = "https://central.sonatype.com/api/v1/publisher"
+                    stagingRepository(stagingRepo.get())
+                    username = findProperty("maven-central.username") as? String ?: ""
+                    password = findProperty("maven-central.password") as? String ?: ""
                 }
-                pomchecker {
-                    strict = true
-                }
+            }
+            pomchecker {
+                strict = true
             }
         }
     }
 }
-
 
 dependencies {
     implementation(libs.slf4j.api)
