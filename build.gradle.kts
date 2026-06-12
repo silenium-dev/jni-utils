@@ -1,16 +1,21 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import kotlin.io.encoding.Base64
 
 plugins {
     alias(libs.plugins.kotlin)
     `maven-publish`
+    signing
 }
 
 val deployEnabled = (findProperty("deploy.enabled") as String?)?.toBoolean() ?: false
+val mavenCentralEnabled = (findProperty("maven-central.enabled") as String?)?.toBoolean() ?: false
+val signingEnabled = (findProperty("gpg.enabled") as String?)?.toBoolean() ?: false
 
 allprojects {
     apply<MavenPublishPlugin>()
     apply<BasePlugin>()
+    if (signingEnabled) apply<SigningPlugin>()
 
     group = "dev.silenium.libs.jni"
     val gitVersionProvider = providers.gradleProperty("ci").flatMap {
@@ -43,6 +48,23 @@ allprojects {
                     }
                 }
             }
+            if (mavenCentralEnabled) {
+                mavenCentral {
+                    credentials {
+                        username = findProperty("maven-central.username") as? String ?: ""
+                        password = findProperty("maven-central.password") as? String ?: ""
+                    }
+                }
+            }
+        }
+    }
+
+    if (signingEnabled) {
+        signing {
+            val secretKey = Base64.decode((findProperty("gpg.secret-key") as? String ?: "").trim()).decodeToString()
+            val passphrase = (findProperty("gpg.passphrase") as? String ?: "").trim()
+            useInMemoryPgpKeys(secretKey, passphrase)
+            sign(publishing.publications)
         }
     }
 }

@@ -1,9 +1,11 @@
 import jetbrains.buildServer.configs.kotlin.*
+import jetbrains.buildServer.configs.kotlin.BuildStep.ExecutionMode
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.vcsLabeling
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.projectFeatures.UntrustedBuildsSettings
 import jetbrains.buildServer.configs.kotlin.projectFeatures.untrustedBuildsSettings
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
@@ -62,21 +64,48 @@ object BuildRelease : BuildType({
             display = ParameterDisplay.PROMPT,
             allowEmpty = false
         )
+
         text(
-            "deploy.repo-url",
+            "nexus.repo-url",
             "https://nexus.silenium.dev/repository/maven-releases",
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
         text(
-            "deploy.username",
+            "nexus.username",
             "teamcity-ci",
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
         password(
-            "deploy.password",
+            "nexus.password",
             "credentialsJSON:149ec97d-3f03-4588-b740-38f933c0d1e2",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
+
+        password(
+            "maven-central.username",
+            "credentialsJSON:252356db-9418-4ae9-8f06-0d16bc690805",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
+        password(
+            "maven-central.password",
+            "credentialsJSON:6375fac2-1d65-4f4e-bfea-09191d89f44d",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
+
+        password(
+            "gpg.secret-key",
+            "credentialsJSON:aa15cd06-be04-40d6-9569-a781b94f5d9c",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
+        password(
+            "gpg.passphrase",
+            "credentialsJSON:becb8d56-5e47-4e7f-847c-166dcaae1a34",
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
@@ -91,9 +120,15 @@ object BuildRelease : BuildType({
             gradleParams = """
                 |-Pdeploy.version=%release.version%
                 |-Pdeploy.enabled=true
-                |-Pdeploy.repo-url=%deploy.repo-url%
-                |-Pdeploy.username=%deploy.username%
-                |-Pdeploy.password=%deploy.password%
+                |-Pnexus.repo-url=%nexus.repo-url%
+                |-Pnexus.username=%nexus.username%
+                |-Pnexus.password=%nexus.password%
+                |-Pmaven-central.username=%maven-central.username%
+                |-Pmaven-central.password=%maven-central.password%
+                |-Pmaven-central.enabled=true
+                |-Pgpg.secret-key=%gpg.secret-key%
+                |-Pgpg.passphrase=%gpg.passphrase%
+                |-Pgpg.enabled=true
                 |--scan
                 |--info
             """.trimMargin().replace("\n", " ")
@@ -151,6 +186,19 @@ object BuildSnapshot : BuildType({
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
+
+        password(
+            "gpg.secret-key",
+            "credentialsJSON:aa15cd06-be04-40d6-9569-a781b94f5d9c",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
+        password(
+            "gpg.passphrase",
+            "credentialsJSON:becb8d56-5e47-4e7f-847c-166dcaae1a34",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
     }
 
     steps {
@@ -165,6 +213,9 @@ object BuildSnapshot : BuildType({
                 |-Pdeploy.repo-url=%deploy.repo-url%
                 |-Pdeploy.username=%deploy.username%
                 |-Pdeploy.password=%deploy.password%
+                |-Pgpg.secret-key=%gpg.secret-key%
+                |-Pgpg.passphrase=%gpg.passphrase%
+                |-Pgpg.enabled=true
                 |--scan
                 |--info
             """.trimMargin().replace("\n", " ")
