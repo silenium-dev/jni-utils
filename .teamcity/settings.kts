@@ -105,6 +105,12 @@ object BuildRelease : BuildType({
             readOnly = true
         )
         password(
+            "gpg.public-key",
+            "credentialsJSON:03a34fba-18cb-4875-8996-135df4d49efd",
+            display = ParameterDisplay.HIDDEN,
+            readOnly = true
+        )
+        password(
             "gpg.passphrase",
             "credentialsJSON:becb8d56-5e47-4e7f-847c-166dcaae1a34",
             display = ParameterDisplay.HIDDEN,
@@ -123,6 +129,7 @@ object BuildRelease : BuildType({
                 |-Pmaven-central.username=%maven-central.username%
                 |-Pmaven-central.password=%maven-central.password%
                 |-Pgpg.secret-key=%gpg.secret-key%
+                |-Pgpg.public-key=%gpg.public-key%
                 |-Pgpg.passphrase=%gpg.passphrase%
                 |-Pgpg.enabled=true
                 |--scan

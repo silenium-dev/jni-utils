@@ -17,6 +17,7 @@ val nexusEnabled = (findProperty("nexus.enabled") as String?)?.toBoolean() ?: fa
 val mavenCentralEnabled = (findProperty("maven-central.enabled") as String?)?.toBoolean() ?: false
 val signingEnabled = (findProperty("gpg.enabled") as String?)?.toBoolean() ?: false
 val signingSecretKey = Base64.decode((findProperty("gpg.secret-key") as? String ?: "").trim()).decodeToString()
+val signingPublicKey = Base64.decode((findProperty("gpg.public-key") as? String ?: "").trim()).decodeToString()
 val signingPassphrase = (findProperty("gpg.passphrase") as? String ?: "").trim()
 val stagingRepo = layout.buildDirectory.dir("m2-staging")
 
@@ -94,6 +95,7 @@ allprojects {
                 mode = Signing.Mode.MEMORY
                 passphrase = signingPassphrase
                 secretKey = signingSecretKey
+                publicKey = signingPublicKey
             }
         }
         deploy {
