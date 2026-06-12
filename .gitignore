@@ -1,9 +1,15 @@
 .gradle
+.kotlin
+.direnv
 build/
-.kotlin/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+/*.png
+*.log
+local.properties
+gradle/gradle-daemon-jvm.properties
+.cxx/
 
 ### IntelliJ IDEA ###
 .idea/
