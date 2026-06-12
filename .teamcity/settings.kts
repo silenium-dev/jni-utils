@@ -137,6 +137,7 @@ object BuildRelease : BuildType({
             """.trimMargin().replace("\n", " ")
         gradle {
             tasks = """
+                |clean
                 |build
                 |publish
             """.trimMargin().replace("\n", " ")
