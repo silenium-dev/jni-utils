@@ -64,7 +64,6 @@ allprojects {
         }
         publications.withType<MavenPublication>() {
             pom {
-                description = "A library for working with native libraries"
                 url = "https://github.com/silenium-dev/jni-utils"
                 inceptionYear = "2024"
                 licenses {
@@ -159,6 +158,10 @@ publishing {
     publications {
         create<MavenPublication>("main") {
             from(components["java"])
+            pom {
+                name = "jni-utils"
+                description = "A library for working with native libraries"
+            }
         }
     }
 }

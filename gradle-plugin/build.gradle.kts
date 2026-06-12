@@ -29,6 +29,7 @@ kotlin {
 
 java {
     withSourcesJar()
+    withJavadocJar()
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -40,6 +41,15 @@ gradlePlugin {
         register("jni-utils") {
             id = "dev.silenium.libs.jni.nix-natives"
             implementationClass = "dev.silenium.libs.jni.NixNativesPlugin"
+        }
+    }
+}
+
+publishing {
+    publications.withType<MavenPublication> {
+        pom {
+            name = "gradle-plugin"
+            description = "A library for working with native libraries"
         }
     }
 }
