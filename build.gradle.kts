@@ -8,7 +8,7 @@ plugins {
     signing
 }
 
-val deployEnabled = (findProperty("deploy.enabled") as String?)?.toBoolean() ?: false
+val nexusEnabled = (findProperty("nexus.enabled") as String?)?.toBoolean() ?: false
 val mavenCentralEnabled = (findProperty("maven-central.enabled") as String?)?.toBoolean() ?: false
 val signingEnabled = (findProperty("gpg.enabled") as String?)?.toBoolean() ?: false
 
@@ -38,13 +38,13 @@ allprojects {
 
     publishing {
         repositories {
-            if (deployEnabled) {
-                val url = findProperty("deploy.repo-url") as? String ?: error("No deploy.repo-url specified")
+            if (nexusEnabled) {
+                val url = findProperty("nexus.repo-url") as? String ?: error("No deploy.repo-url specified")
                 maven(url) {
                     name = "nexus"
                     credentials {
-                        username = findProperty("deploy.username") as? String ?: ""
-                        password = findProperty("deploy.password") as? String ?: ""
+                        username = findProperty("nexus.username") as? String ?: ""
+                        password = findProperty("nexus.password") as? String ?: ""
                     }
                 }
             }

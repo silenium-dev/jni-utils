@@ -119,13 +119,13 @@ object BuildRelease : BuildType({
             """.trimMargin().replace("\n", " ")
             gradleParams = """
                 |-Pdeploy.version=%release.version%
-                |-Pdeploy.enabled=true
+                |-Pnexus.enabled=true
                 |-Pnexus.repo-url=%nexus.repo-url%
                 |-Pnexus.username=%nexus.username%
                 |-Pnexus.password=%nexus.password%
+                |-Pmaven-central.enabled=true
                 |-Pmaven-central.username=%maven-central.username%
                 |-Pmaven-central.password=%maven-central.password%
-                |-Pmaven-central.enabled=true
                 |-Pgpg.secret-key=%gpg.secret-key%
                 |-Pgpg.passphrase=%gpg.passphrase%
                 |-Pgpg.enabled=true
