@@ -4,6 +4,7 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.vcsLabeling
+import jetbrains.buildServer.configs.kotlin.buildSteps.gitHubRelease
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.projectFeatures.UntrustedBuildsSettings
@@ -112,12 +113,7 @@ object BuildRelease : BuildType({
     }
 
     steps {
-        gradle {
-            tasks = """
-                |build
-                |publish
-            """.trimMargin().replace("\n", " ")
-            gradleParams = """
+        val gradleArgs = """
                 |-Pdeploy.version=%release.version%
                 |-Pnexus.enabled=true
                 |-Pnexus.repo-url=%nexus.repo-url%
@@ -132,6 +128,27 @@ object BuildRelease : BuildType({
                 |--scan
                 |--info
             """.trimMargin().replace("\n", " ")
+        gradle {
+            tasks = """
+                |build
+                |publish
+            """.trimMargin().replace("\n", " ")
+            gradleParams = gradleArgs
+        }
+        gradle {
+            tasks = """
+                |jreleaserDeploy
+            """.trimMargin().replace("\n", " ")
+            gradleParams = gradleArgs
+        }
+        gitHubRelease {
+            name = "Create GitHub Release"
+            targetVcsRootId = "${DslContext.settingsRoot.id}"
+            githubUrl = "https://api.github.com"
+            tagName = "%release.version%"
+            generateReleaseNotes = true
+            draft = true
+            authType = vcsRoot()
         }
     }
 })

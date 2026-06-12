@@ -1,9 +1,14 @@
+import org.gradle.kotlin.dsl.signing
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jreleaser.gradle.plugin.JReleaserPlugin
+import org.jreleaser.model.Active
+import org.jreleaser.model.Signing
 import kotlin.io.encoding.Base64
 
 plugins {
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.jreleaser)
     `maven-publish`
     signing
 }
@@ -11,11 +16,14 @@ plugins {
 val nexusEnabled = (findProperty("nexus.enabled") as String?)?.toBoolean() ?: false
 val mavenCentralEnabled = (findProperty("maven-central.enabled") as String?)?.toBoolean() ?: false
 val signingEnabled = (findProperty("gpg.enabled") as String?)?.toBoolean() ?: false
+val signingSecretKey = Base64.decode((findProperty("gpg.secret-key") as? String ?: "").trim()).decodeToString()
+val signingPassphrase = (findProperty("gpg.passphrase") as? String ?: "").trim()
+val stagingRepo = layout.buildDirectory.dir("m2-staging")
 
 allprojects {
     apply<MavenPublishPlugin>()
     apply<BasePlugin>()
-    if (signingEnabled) apply<SigningPlugin>()
+    apply<JReleaserPlugin>()
 
     group = "dev.silenium.libs.jni"
     val gitVersionProvider = providers.gradleProperty("ci").flatMap {
@@ -48,23 +56,61 @@ allprojects {
                     }
                 }
             }
-            if (mavenCentralEnabled) {
-                mavenCentral {
-                    credentials {
-                        username = findProperty("maven-central.username") as? String ?: ""
-                        password = findProperty("maven-central.password") as? String ?: ""
+            maven {
+                name = "staging"
+                url = uri(stagingRepo)
+            }
+        }
+        publications.withType<MavenPublication>() {
+            pom {
+                description = "A library for working with native libraries"
+                url = "https://github.com/silenium-dev/jni-utils"
+                inceptionYear = "2024"
+                licenses {
+                    license {
+                        name = "AGPL-3.0-or-later"
+                        url = "https://spdx.org/licenses/AGPL-3.0-or-later.html"
                     }
+                }
+                developers {
+                    developer {
+                        id = "silenium-dev"
+                        email = "support@silenium-dev.net"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/silenium-dev/jni-utils.git"
+                    developerConnection = "scm:git:ssh://github.com/silenium-dev/jni-utils.git"
+                    url = "https://github.com/silenium-dev/jni-utils"
                 }
             }
         }
     }
 
-    if (signingEnabled) {
+    jreleaser {
         signing {
-            val secretKey = Base64.decode((findProperty("gpg.secret-key") as? String ?: "").trim()).decodeToString()
-            val passphrase = (findProperty("gpg.passphrase") as? String ?: "").trim()
-            useInMemoryPgpKeys(secretKey, passphrase)
-            sign(publishing.publications)
+            active = if (signingEnabled) Active.ALWAYS else Active.NEVER
+            pgp {
+                mode = Signing.Mode.MEMORY
+                passphrase = signingPassphrase
+                secretKey = signingSecretKey
+            }
+        }
+        deploy {
+            maven {
+                mavenCentral {
+                    register("sonatype") {
+                        active = if (mavenCentralEnabled) Active.ALWAYS else Active.NEVER
+                        url = "https://central.sonatype.com/api/v1/publisher"
+                        stagingRepository(stagingRepo.get())
+                        username = findProperty("maven-central.username") as? String ?: ""
+                        password = findProperty("maven-central.password") as? String ?: ""
+                    }
+                }
+                pomchecker {
+                    strict = true
+                }
+            }
         }
     }
 }
@@ -103,6 +149,7 @@ kotlin {
 }
 
 java {
+    withJavadocJar()
     withSourcesJar()
 }
 
