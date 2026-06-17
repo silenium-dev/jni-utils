@@ -121,6 +121,7 @@ object BuildRelease : BuildType({
     steps {
         val gradleArgs = """
                 |-Pdeploy.version=%release.version%
+                |-Pdeploy.enabled=true
                 |-Pnexus.enabled=true
                 |-Pnexus.repo-url=%nexus.repo-url%
                 |-Pnexus.username=%nexus.username%
@@ -235,12 +236,10 @@ object BuildSnapshot : BuildType({
             gradleParams = """
                 |-Pci=true
                 |-Pdeploy.enabled=true
-                |-Pdeploy.repo-url=%deploy.repo-url%
-                |-Pdeploy.username=%deploy.username%
-                |-Pdeploy.password=%deploy.password%
-                |-Pgpg.secret-key=%gpg.secret-key%
-                |-Pgpg.passphrase=%gpg.passphrase%
-                |-Pgpg.enabled=true
+                |-Pnexus.enabled=true
+                |-Pnexus.repo-url=%deploy.repo-url%
+                |-Pnexus.username=%deploy.username%
+                |-Pnexus.password=%deploy.password%
                 |--scan
                 |--info
             """.trimMargin().replace("\n", " ")
