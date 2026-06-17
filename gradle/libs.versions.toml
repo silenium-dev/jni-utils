@@ -10,6 +10,8 @@ mockk = "1.14.9"
 commons-lang3 = "3.20.0"
 jetbrains-annotations = "26.1.0"
 
+conventions = "0.1.5-16-g0d505876"
+
 [libraries]
 commons-lang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commons-lang3" }
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrains-annotations" }
@@ -24,11 +26,9 @@ kotest-assertions-json = { group = "io.kotest", name = "kotest-assertions-json",
 
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
-kotlin-jvm-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-jreleaser = { id = "org.jreleaser", version = "1.24.0" }
+conventions-plugin = { id = "dev.silenium.gradle.conventions.gradle-plugin", version.ref = "conventions" }
+conventions-jvm = { id = "dev.silenium.gradle.conventions.jvm", version.ref = "conventions" }
 
 [bundles]
 kotest = [
