@@ -1,4 +1,5 @@
 import dev.silenium.gradle.conventions.jvm
+import dev.silenium.gradle.conventions.publishing
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
@@ -29,5 +30,8 @@ conventions {
     jvm {
         jvmTarget = JvmTarget.JVM_11
         kotlinTarget = KotlinVersion.KOTLIN_2_2
+    }
+    publishing {
+        enabled = true
     }
 }
