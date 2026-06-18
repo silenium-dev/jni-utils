@@ -12,6 +12,7 @@ allprojects {
         conventions {
             publishing {
                 pomSpec.set {
+                    name = project.name
                     description = "A library for working with native libraries"
                     url = "https://github.com/silenium-dev/jni-utils"
                     inceptionYear = "2024"
