@@ -18,8 +18,8 @@ allprojects {
                     inceptionYear = "2024"
                     licenses {
                         license {
-                            name = "AGPL-3.0-or-later"
-                            url = "https://spdx.org/licenses/AGPL-3.0-or-later.html"
+                            name = "GPL-3.0-or-later"
+                            url = "https://spdx.org/licenses/GPL-3.0-or-later.html"
                         }
                     }
                     developers {
