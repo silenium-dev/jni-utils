@@ -195,33 +195,20 @@ object BuildSnapshot : BuildType({
 
     params {
         text(
-            "deploy.repo-url",
+            "nexus.repo-url",
             "https://nexus.silenium.dev/repository/maven-snapshots",
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
         text(
-            "deploy.username",
+            "nexus.username",
             "teamcity-ci",
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
         password(
-            "deploy.password",
+            "nexus.password",
             "credentialsJSON:149ec97d-3f03-4588-b740-38f933c0d1e2",
-            display = ParameterDisplay.HIDDEN,
-            readOnly = true
-        )
-
-        password(
-            "gpg.secret-key",
-            "credentialsJSON:aa15cd06-be04-40d6-9569-a781b94f5d9c",
-            display = ParameterDisplay.HIDDEN,
-            readOnly = true
-        )
-        password(
-            "gpg.passphrase",
-            "credentialsJSON:becb8d56-5e47-4e7f-847c-166dcaae1a34",
             display = ParameterDisplay.HIDDEN,
             readOnly = true
         )
@@ -237,9 +224,9 @@ object BuildSnapshot : BuildType({
                 |-Pci=true
                 |-Pdeploy.enabled=true
                 |-Pnexus.enabled=true
-                |-Pnexus.repo-url=%deploy.repo-url%
-                |-Pnexus.username=%deploy.username%
-                |-Pnexus.password=%deploy.password%
+                |-Pnexus.repo-url=%nexus.repo-url%
+                |-Pnexus.username=%nexus.username%
+                |-Pnexus.password=%nexus.password%
                 |--scan
                 |--info
             """.trimMargin().replace("\n", " ")
