@@ -13,4 +13,4 @@ plugins {
 }
 rootProject.name = "jni-utils"
 
-include(":gradle-plugin", ":lib")
+include(":gradle-plugin", ":jni-utils")

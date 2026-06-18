@@ -9,7 +9,7 @@ plugins {
 group = "dev.silenium.libs.jni"
 
 dependencies {
-    api(project(":lib"))
+    api(project(":jni-utils"))
     implementation(gradleKotlinDsl())
     implementation(gradleApi())
 
