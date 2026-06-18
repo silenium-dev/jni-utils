@@ -1,3 +1,5 @@
+import dev.silenium.gradle.conventions.publishing
+
 plugins {
     alias(libs.plugins.conventions.jvm)
     alias(libs.plugins.conventions.plugin) apply false
@@ -5,4 +7,31 @@ plugins {
 
 allprojects {
     group = "dev.silenium.libs.jni"
+
+    conventions {
+        publishing {
+            pomSpec.set {
+                description = "A library for working with native libraries"
+                url = "https://github.com/silenium-dev/jni-utils"
+                inceptionYear = "2024"
+                licenses {
+                    license {
+                        name = "AGPL-3.0-or-later"
+                        url = "https://spdx.org/licenses/AGPL-3.0-or-later.html"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "silenium-dev"
+                        email = "support@silenium-dev.net"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/silenium-dev/jni-utils.git"
+                    developerConnection = "scm:git:ssh://github.com/silenium-dev/jni-utils.git"
+                    url = "https://github.com/silenium-dev/jni-utils"
+                }
+            }
+        }
+    }
 }
