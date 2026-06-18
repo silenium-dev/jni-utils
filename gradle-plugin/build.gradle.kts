@@ -6,8 +6,6 @@ plugins {
     alias(libs.plugins.conventions.plugin)
 }
 
-group = "dev.silenium.libs.jni"
-
 dependencies {
     api(project(":jni-utils"))
     implementation(gradleKotlinDsl())

@@ -7,8 +7,6 @@ plugins {
     alias(libs.plugins.conventions.jvm)
 }
 
-group = "dev.silenium.libs.jni"
-
 dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.commons.lang3)
