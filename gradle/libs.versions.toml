@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.4.10"
 
-slf4j = "2.0.18"
+slf4j = "2.0.20"
 logback = "1.6.3"
 
 kotest = "6.2.5"
