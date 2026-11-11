@@ -21,13 +21,13 @@ fun Project.nixEval(config: Action<NixEvalSpec>): Provider<JsonElement> {
     val execResult = project.providers.exec {
         it.commandLine(cmdLine)
         it.workingDir(spec.workingDir)
-        it.errorOutput = System.err
     }
-    return execResult.result.zip(execResult.standardOutput.asText) { result, output ->
+    return execResult.result.zip(execResult.standardError.asText) { result, stdErr ->
         if (result.exitValue != 0) {
-            logger.error("Error running ${cmdLine.joinToString(" ")}: exit code ${result.exitValue}")
+            logger.error("Error running ${cmdLine.joinToString(" ")} with exit code ${result.exitValue}: $stdErr")
             result.assertNormalExitValue().rethrowFailure()
         }
-        Json.parseToJsonElement(output)
+    }.zip(execResult.standardOutput.asText) { _, stdOut ->
+        Json.parseToJsonElement(stdOut)
     }
 }
