@@ -3,8 +3,8 @@ package dev.silenium.libs.jni
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 import org.gradle.language.jvm.tasks.ProcessResources
 
 @Suppress("unused") // used as plugin entrypoint
@@ -36,11 +36,14 @@ class NixNativesPlugin : Plugin<Project> {
         }
 
         target.afterEvaluate { project ->
-            project.tasks.named<ProcessResources>("processResources") {
-                val out = nixBuild.flatMap { it.resultDir.asFile }
-                from(out)
-                dirPermissions {
-                    it.unix("755")
+            if (ext.processResources.getOrElse(true)) {
+                project.tasks.withType<ProcessResources>().configureEach { task ->
+                    if (task.name != "processResources") return@configureEach
+                    val out = nixBuild.flatMap { it.resultDir.asFile }
+                    task.from(out)
+                    task.dirPermissions {
+                        it.unix("755")
+                    }
                 }
             }
         }
