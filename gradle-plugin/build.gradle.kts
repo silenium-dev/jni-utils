@@ -11,6 +11,7 @@ dependencies {
     api(project(":jni-utils"))
     implementation(gradleKotlinDsl())
     implementation(gradleApi())
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.logback.classic)
     testImplementation(libs.bundles.kotest)
