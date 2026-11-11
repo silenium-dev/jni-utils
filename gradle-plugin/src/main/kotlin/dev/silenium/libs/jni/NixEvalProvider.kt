@@ -18,7 +18,7 @@ interface NixEvalSpec {
 fun Project.nixEval(config: Action<NixEvalSpec>): Provider<JsonElement> {
     val spec = objects.newInstance<NixEvalSpec>()
     config.execute(spec)
-    val cmdLine = listOf("nix", "eval", "--json", spec.expression)
+    val cmdLine = listOf("nix", "eval", "--json", spec.expression.get())
     val execResult = project.providers.exec {
         it.commandLine(cmdLine)
         it.workingDir(spec.workingDir)
