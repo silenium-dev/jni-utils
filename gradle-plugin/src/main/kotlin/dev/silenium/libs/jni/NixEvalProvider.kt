@@ -21,7 +21,7 @@ fun Project.nixEval(config: Action<NixEvalSpec>): Provider<JsonElement> {
     val cmdLine = listOf("nix", "eval", "--json", spec.expression.get())
     val execResult = project.providers.exec {
         it.commandLine(cmdLine)
-        it.workingDir(spec.workingDir)
+        it.workingDir(spec.workingDir.orElse(layout.projectDirectory))
         it.isIgnoreExitValue = true
     }
     return execResult.result.map { result ->
