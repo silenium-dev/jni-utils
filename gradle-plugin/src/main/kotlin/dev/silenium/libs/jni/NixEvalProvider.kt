@@ -17,12 +17,17 @@ interface NixEvalSpec {
 fun Project.nixEval(config: Action<NixEvalSpec>): Provider<JsonElement> {
     val spec = objects.newInstance<NixEvalSpec>()
     config.execute(spec)
+    val cmdLine = listOf("nix", "eval", "--json", spec.expression)
     val execResult = project.providers.exec {
-        it.commandLine("nix", "eval", "--json", spec.expression)
+        it.commandLine(cmdLine)
         it.workingDir(spec.workingDir)
+        it.errorOutput = System.err
     }
     return execResult.result.zip(execResult.standardOutput.asText) { result, output ->
-        result.assertNormalExitValue().rethrowFailure()
+        if (result.exitValue != 0) {
+            logger.error("Error running ${cmdLine.joinToString(" ")}: exit code ${result.exitValue}")
+            result.assertNormalExitValue().rethrowFailure()
+        }
         Json.parseToJsonElement(output)
     }
 }
