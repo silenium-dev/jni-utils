@@ -13,7 +13,6 @@ class NixNativesPlugin : Plugin<Project> {
         val ext = target.extensions.create("nixNatives", NixNativesExtension::class.java)
         ext.libVersion.convention(target.version.toString())
         ext.libName.convention(target.name)
-        ext.nixFlakeLock.convention(target.layout.file(ext.nixFlake.map { it.asFile.resolveSibling("flake.lock") }))
         val nixResultDir = target.layout.buildDirectory.dir("nix-result")
 
         val nixClean = target.tasks.register<Delete>("nixClean") {
@@ -29,7 +28,8 @@ class NixNativesPlugin : Plugin<Project> {
             }
             group = "build"
             inputs.files(ext.sourceFiles)
-            inputs.files(ext.nixFlake, ext.nixFlakeLock)
+            inputs.files(ext.flakeDir.files("flake.nix", "flake.lock"))
+            flakeDir.set(ext.flakeDir.asFile)
             libName.set(ext.libName)
             resultDir.set(nixResultDir)
             showLogs.set(ext.showLogs)
