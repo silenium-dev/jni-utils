@@ -6,6 +6,8 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
@@ -20,7 +22,7 @@ abstract class NixBuildTask : Exec() {
     @get:OutputDirectory
     abstract val resultDir: DirectoryProperty
 
-    @get:InputDirectory
+    @get:Input
     abstract val flakeDir: Property<File>
 
     override fun exec() {
