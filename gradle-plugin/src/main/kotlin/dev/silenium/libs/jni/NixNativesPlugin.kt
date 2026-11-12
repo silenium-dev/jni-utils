@@ -13,6 +13,9 @@ class NixNativesPlugin : Plugin<Project> {
         val ext = target.extensions.create("nixNatives", NixNativesExtension::class.java)
         ext.libVersion.convention(target.version.toString())
         ext.libName.convention(target.name)
+        ext.showLogs.convention(target.providers.environmentVariable("CI").orElse("false").map { it != "false" })
+        ext.flakeDir.convention(target.layout.projectDirectory)
+        ext.processResources.convention(true)
         val nixResultDir = target.layout.buildDirectory.dir("nix-result")
 
         val nixClean = target.tasks.register<Delete>("nixClean") {
@@ -36,7 +39,7 @@ class NixNativesPlugin : Plugin<Project> {
         }
 
         target.afterEvaluate { project ->
-            if (ext.processResources.getOrElse(true)) {
+            if (ext.processResources.get()) {
                 project.tasks.withType<ProcessResources>().configureEach { task ->
                     if (task.name != "processResources") return@configureEach
                     val out = nixBuild.flatMap { it.resultDir.asFile }
