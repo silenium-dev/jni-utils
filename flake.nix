@@ -144,7 +144,7 @@
               mkDerivation = targetSystem:
                 if isWindows targetSystem
                 then clang-msvc-cross.lib.mkDerivation (archOf targetSystem)
-                else pkgs.stdenv.mkDerivation;
+                else (targetPkgs targetSystem).stdenv.mkDerivation;
             in
             forAllSystems (targetSystem: (mkDerivation targetSystem) rec {
               pname = name + "-${targetSystem}";
