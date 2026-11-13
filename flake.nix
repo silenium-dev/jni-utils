@@ -172,7 +172,7 @@
 
               configurePhase = (pkgs.lib.strings.join "\n" [
                 (preConfigurePhase targetSystem)
-                "meson setup ${pkgs.lib.strings.join " " mesonFlags} ${buildDir} || (cat '${buildDir}/meson-logs/*' && exit 1)"
+                "meson setup ${pkgs.lib.strings.join " " mesonFlags} ${buildDir} || (cat \"${buildDir}/meson-logs/*\" && exit 1)"
                 (postConfigurePhase targetSystem)
               ]);
 
