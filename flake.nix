@@ -2,9 +2,12 @@
   description = "jni build environment";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=fe416aaedd397cacb33a610b33d60ff2b431b127";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    clang-msvc-cross.url = "git+https://codeberg.org/silenium-dev/clang-msvc-cross.git";
+    clang-msvc-cross = {
+      url = "git+https://codeberg.org/silenium-dev/clang-msvc-cross.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { flake-parts, nixpkgs, clang-msvc-cross, ... } @ inputs: flake-parts.lib.mkFlake { inherit inputs; } {
