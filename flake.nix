@@ -69,7 +69,6 @@
               pkgs.gradle_9
 
               # C/C++ Build Tools
-              pkgs.cmake
               pkgs.ninja
               pkgs.meson
 
@@ -90,6 +89,7 @@
                   crossPkgs.gcc
                   crossPkgs.binutils
                   crossPkgs.pkg-config
+                  crossPkgs.cmake
                 ]
               else [ ]
             );
